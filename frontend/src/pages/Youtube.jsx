@@ -6,69 +6,74 @@ const Youtube = () => {
   const API_KEY = 'AIzaSyCPg0CcAIkrr0evRZF3iVQplTFWQqJxFXE';
   const SCOPES = 'https://www.googleapis.com/auth/youtube.readonly';
 
-  const [channelIds, setChannelIds] = useState([]);
-  const [channelData, setChannelData] = useState([]);
+
+  const [videos, setVideos] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const authenticate = () => {
     gapi.auth2
       .getAuthInstance()
       .signIn()
       .then(() => {
-        console.log('Sign-in successful');
+        setIsLoggedIn(true);
         loadClient();
       })
       .catch((error) => console.error('Error signing in', error));
   };
 
   const loadClient = () => {
-    gapi.client
-      .setApiKey(API_KEY);
+    gapi.client.setApiKey(API_KEY);
     gapi.client
       .load('https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest')
       .then(() => {
-        console.log('GAPI client loaded for API');
-        listChannels();
+        listVideos();
       })
       .catch((error) => console.error('Error loading GAPI client', error));
   };
 
-  const listChannels = () => {
-    gapi.client.youtube.channels
+  const listVideos = () => {
+    setLoading(true);
+    gapi.client.youtube.search
       .list({
         part: 'id,snippet',
-        mine: true,
+        forMine: true,
+        type: 'video',
+        maxResults: 10,
       })
       .then((response) => {
-        console.log('Channels:', response.result.items);
-        const ids = response.result.items.map((item) => item.id);
-        setChannelIds(ids);
-        console.log('Channel IDs:', ids);
+        const videoIds = response.result.items.map((item) => item.id.videoId);
+        fetchVideoDetails(videoIds);
       })
-      .catch((error) => console.error('Error fetching channels', error));
+      .catch((error) => {
+        console.error('Error fetching videos', error);
+        setLoading(false);
+      });
   };
 
-  const fetchAllChannelData = async () => {
-    if (channelIds.length === 0) return;
+  const fetchVideoDetails = (videoIds) => {
+    gapi.client.youtube.videos
+      .list({
+        part: 'snippet,statistics,status,contentDetails',
+        id: videoIds.join(','),
+      })
+      .then((response) => {
+        setVideos(response.result.items);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching video details', error);
+        setLoading(false);
+      });
+  };
 
-    setLoading(true);
-    try {
-      const data = await Promise.all(
-        channelIds.map(async (id) => {
-          const response = await gapi.client.youtube.channels.list({
-            part: 'snippet,statistics',
-            id: id,
-          });
-          return response.result.items[0];
-        })
-      );
-      setChannelData(data);
-      console.log('All Channel Data:', data);
-    } catch (error) {
-      console.error('Error fetching channel data:', error);
-    } finally {
-      setLoading(false);
-    }
+  const openVideoStats = (video) => {
+    setSelectedVideo(video);
+  };
+
+  const closeVideoStats = () => {
+    setSelectedVideo(null);
   };
 
   useEffect(() => {
@@ -81,40 +86,102 @@ const Youtube = () => {
   }, []);
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <h1>YouTube Channels</h1>
-      <button onClick={authenticate}>Sign In and Fetch Channels</button>
-      {channelIds.length > 0 && (
-        <button onClick={fetchAllChannelData}>Fetch Channel Data</button>
-      )}
-      {channelData.length > 0 ? (
-        <div>
-          <h2>Channel Data:</h2>
-          <ul>
-            {channelData.map((channel, index) => (
-              <li key={index} className='p-4 border rounded mb-4'>
-                <img
-                  src={channel.snippet.thumbnails.default.url}
-                  alt={channel.snippet.title}
-                  className='w-16 h-16 rounded-full'
-                />
-                <h3>{channel.snippet.title}</h3>
-                <p>{channel.snippet.description}</p>
-                <p>
-                  Subscribers: {channel.statistics.subscriberCount || 'N/A'}
-                </p>
-                <p>
-                  Videos: {channel.statistics.videoCount || 'N/A'}
-                </p>
-                <p>
-                  Views: {channel.statistics.viewCount || 'N/A'}
-                </p>
-              </li>
-            ))}
-          </ul>
+    <div className="flex flex-col items-center justify-center p-4 bg-gray-50 min-h-screen">
+      {!isLoggedIn ? (
+        <div className="text-center bg-white shadow-lg p-6 rounded-lg">
+          <h1 className="text-3xl font-bold mb-4">Welcome to YouTube Video Viewer</h1>
+          <p className="mb-6 text-gray-600">Sign in to view your YouTube videos.</p>
+          <button
+            onClick={authenticate}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Sign In with Google
+          </button>
         </div>
       ) : (
-        <div>No channels data to display</div>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-2xl font-bold mb-6">Your YouTube Videos</h1>
+
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <div className="loader border-t-4 border-blue-500 w-12 h-12 rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <table className="table-auto w-full border-collapse border border-gray-300 text-sm sm:text-base">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-4 py-2">Thumbnail</th>
+                  <th className="border border-gray-300 px-4 py-2">Title</th>
+                  <th className="border border-gray-300 px-4 py-2">Published Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Visibility</th>
+                  <th className="border border-gray-300 px-4 py-2">Views</th>
+                  <th className="border border-gray-300 px-4 py-2">Likes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {videos.map((video) => (
+                  <tr
+                    key={video.id}
+                    className="cursor-pointer hover:bg-gray-100"
+                    onClick={() => openVideoStats(video)}
+                  >
+                    <td className="border border-gray-300 px-4 py-2">
+                      <img
+                        src={video.snippet.thumbnails.default.url}
+                        alt={video.snippet.title}
+                        className="rounded-lg"
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">{video.snippet.title}</td>
+                    <td className="border border-gray-300 px-4 py-2">{new Date(video.snippet.publishedAt).toLocaleDateString()}</td>
+                    <td className="border border-gray-300 px-4 py-2">{video.status.privacyStatus}</td>
+                    <td className="border border-gray-300 px-4 py-2">{video.statistics.viewCount || 'N/A'}</td>
+                    <td className="border border-gray-300 px-4 py-2">{video.statistics.likeCount || 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {selectedVideo && (
+            <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-4/5 max-w-4xl space-y-4">
+                <h2 className="text-2xl font-bold text-center">{selectedVideo.snippet.title}</h2>
+                <img
+                  src={selectedVideo.snippet.thumbnails.medium.url}
+                  alt={selectedVideo.snippet.title}
+                  className="rounded-lg mx-auto"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                  <div className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p><strong>Published At:</strong> {new Date(selectedVideo.snippet.publishedAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p><strong>Visibility:</strong> {selectedVideo.status.privacyStatus}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p><strong>Views:</strong> {selectedVideo.statistics.viewCount}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p><strong>Likes:</strong> {selectedVideo.statistics.likeCount}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p><strong>Comments:</strong> {selectedVideo.statistics.commentCount}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p><strong>Duration:</strong> {selectedVideo.contentDetails.duration}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeVideoStats}
+                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition mx-auto block"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

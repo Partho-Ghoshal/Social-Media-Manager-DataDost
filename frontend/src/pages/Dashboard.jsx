@@ -2,11 +2,16 @@ import React from "react";
 import { Card, Title, Metric } from "@tremor/react";
 import { ThumbsUp, MessageCircle, Share2, TrendingUp, Eye } from "lucide-react";
 import { Bar } from "react-chartjs-2";
+import Sidebar from "../components/Sidebar";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Legend, Tooltip } from "chart.js";
 import { NavLink } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import {useAuthStore} from "../store/useAuthStore";
 ChartJS.register(BarElement, CategoryScale, LinearScale, Legend, Tooltip);
 
 const Dashboard = () => {
+  const { authUser } = useAuthStore();
+
   const metrics = [
     { title: "Total Likes", value: "45.2K", icon: ThumbsUp, trend: "+12.3%" },
     { title: "Comments", value: "8.9K", icon: MessageCircle, trend: "+8.1%" },
@@ -14,7 +19,7 @@ const Dashboard = () => {
     { title: "Engagement Rate", value: "4.8%", icon: TrendingUp, trend: "+2.4%" },
     { title: "Impressions", value: "156K", icon: Eye, trend: "+18.2%" },
   ];
-
+  
   const chartdata = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May"],
     datasets: [
@@ -35,7 +40,7 @@ const Dashboard = () => {
       },
     ],
   };
-
+  
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -68,40 +73,46 @@ const Dashboard = () => {
       },
     },
   };
-
+  
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">Welcome to DataDost</h1>
-        <p className="text-gray-600 mt-1">Your social media analytics at a glance</p>
-      </div>
-      <div className="h-10 flex ">
-      
-      <NavLink to={"/instagram"} > <img src="http://freelogopng.com/images/all_img/1658588965instagram-logo-png-transparent-background.png" alt="App Logo" className="h-10 cursor-pointer"/> </NavLink> 
-      <NavLink to={"/facebook"} > <img src="https://static.vecteezy.com/system/resources/previews/017/221/797/non_2x/facebook-logo-transparent-background-free-png.png" alt="App Logo" className="h-20 mt-[-18px] w-19 cursor-pointer"/></NavLink> 
-      <NavLink to={"/youtube"} > <img src="https://static.vecteezy.com/system/resources/previews/018/930/572/non_2x/youtube-logo-youtube-icon-transparent-free-png.png" alt="App Logo" className="h-24 mt-[-27px]  cursor-pointer"/></NavLink> 
-      
-      </div>
+      <Navbar/>
+      <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Welcome {authUser && authUser.fullname}</h1>
+            <p className="text-gray-600 mt-1">Your social media analytics at a glance</p>
+          </div>
+          <div className="h-10 flex ">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {metrics.map((metric) => (
-          <Card key={metric.title} className="p-4 shadow-sm hover:shadow-md transition bg-blue-100 border border-emerald-300">
-            <div className="flex justify-between items-center">
-              <metric.icon className="w-6 h-6 text-blue-600" />
-              <p className="text-green-500 font-semibold">{metric.trend}</p>
+            <NavLink to={"/instagram"} > <img src="http://freelogopng.com/images/all_img/1658588965instagram-logo-png-transparent-background.png" alt="App Logo" className="h-10 cursor-pointer" /> </NavLink>
+            <NavLink to={"/facebook"} > <img src="https://static.vecteezy.com/system/resources/previews/017/221/797/non_2x/facebook-logo-transparent-background-free-png.png" alt="App Logo" className="h-20 mt-[-18px] w-19 cursor-pointer" /></NavLink>
+            <NavLink to={"/youtube"} > <img src="https://static.vecteezy.com/system/resources/previews/018/930/572/non_2x/youtube-logo-youtube-icon-transparent-free-png.png" alt="App Logo" className="h-24 mt-[-27px]  cursor-pointer" /></NavLink>
+
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {metrics.map((metric) => (
+              <Card key={metric.title} className="p-4 shadow-sm hover:shadow-md transition bg-blue-100 border border-emerald-300">
+                <div className="flex justify-between items-center">
+                  <metric.icon className="w-6 h-6 text-blue-600" />
+                  <p className="text-green-500 font-semibold">{metric.trend}</p>
+                </div>
+                <Title className="text-lg font-semibold mt-3">{metric.title}</Title>
+                <Metric className="text-xl font-bold mt-1">{metric.value}</Metric>
+              </Card>
+            ))}
+          </div>
+          <Card className="p-6">
+            <Title className="text-lg font-semibold text-gray-800">Engagement Overview</Title>
+            <div className="mt-6 h-[22rem]">
+              {/* Adjusted height using h-64 */}
+              <Bar data={chartdata} options={options} />
             </div>
-            <Title className="text-lg font-semibold mt-3">{metric.title}</Title>
-            <Metric className="text-xl font-bold mt-1">{metric.value}</Metric>
           </Card>
-        ))}
+        </main>
       </div>
-      <Card className="p-6">
-        <Title className="text-lg font-semibold text-gray-800">Engagement Overview</Title>
-        <div className="mt-6 h-[22rem]">
-          {/* Adjusted height using h-64 */}
-          <Bar data={chartdata} options={options} />
-        </div>
-      </Card>
     </div>
   );
 };

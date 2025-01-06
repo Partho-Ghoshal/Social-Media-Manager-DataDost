@@ -1,7 +1,7 @@
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Navbar from "../components/Navbar";
-import SIdebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar";
 import PostTable from "../components/PostTable";
 import Dashboard from "./Dashboard";
 function HomePage() {
@@ -9,17 +9,13 @@ function HomePage() {
 
   return (
     <div className="App w-full">
-      {isAuthenticated ? (
-        // <div>
-        //   <h1>Welcome, {user.name}!</h1>
-        //   <button onClick={logout}>
-        //     Logout
-        //   </button>
-        // </div>
-        <Dashboard/>
-      ) : (
-        <button onClick={loginWithRedirect}>Login</button>
-      )}
+      <Navbar/>
+      <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+            <Dashboard /> 
+        </main>
+      </div>
     </div>
   );
 }

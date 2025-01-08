@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000';  // Your backend API URL
+const API_URL = 'https://datadost.onrender.com';  // Your backend API URL
 
 export const getLangchainResponse = async (inputValue) => {
   try {

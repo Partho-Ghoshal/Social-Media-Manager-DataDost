@@ -13,10 +13,14 @@ import FacebookData from "./pages/FacebookData";
 import SignUpPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import Chat from "./chatbot/Chat";
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
 
 const App = () => (
-  <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-    <main className="flex-1 overflow-y-auto p-6 md:p-8">
+  <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-auto ">
+      <Navbar />
+
+    <main className="flex-1 overflow-y-auto p-6 md:p-8 ">
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/analytics" element={<Analytics />} />

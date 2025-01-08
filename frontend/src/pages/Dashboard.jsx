@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Title, Metric } from "@tremor/react";
-import { ThumbsUp, MessageCircle, Share2, TrendingUp, Eye } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, TrendingUp, Eye, User, Users } from "lucide-react";
 import { Bar } from "react-chartjs-2";
 import Sidebar from "../components/Sidebar";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Legend, Tooltip } from "chart.js";
@@ -75,21 +75,31 @@ const Dashboard = () => {
   };
   
   return (
-    <div className="space-y-8">
-      <Navbar/>
-      <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="space-y-8 ">
+      
+      <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50 ">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+        <main className="flex-1 ml-64 overflow-y-auto p-6 md:p-8  ">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Welcome {authUser && authUser.fullname}</h1>
             <p className="text-gray-600 mt-1">Your social media analytics at a glance</p>
           </div>
-          <div className="h-10 flex ">
-
-            <NavLink to={"/instagram"} > <img src="http://freelogopng.com/images/all_img/1658588965instagram-logo-png-transparent-background.png" alt="App Logo" className="h-10 cursor-pointer" /> </NavLink>
-            <NavLink to={"/facebook"} > <img src="https://static.vecteezy.com/system/resources/previews/017/221/797/non_2x/facebook-logo-transparent-background-free-png.png" alt="App Logo" className="h-20 mt-[-18px] w-19 cursor-pointer" /></NavLink>
-            <NavLink to={"/youtube"} > <img src="https://static.vecteezy.com/system/resources/previews/018/930/572/non_2x/youtube-logo-youtube-icon-transparent-free-png.png" alt="App Logo" className="h-24 mt-[-27px]  cursor-pointer" /></NavLink>
-
+          <div className="h-10 flex my-3 flex-row justify-between">
+            <div className="flex">
+              <NavLink to={"/instagram"} > <img src="http://freelogopng.com/images/all_img/1658588965instagram-logo-png-transparent-background.png" alt="App Logo" className="h-10 cursor-pointer" /> </NavLink>
+              <NavLink to={"/facebook"} > <img src="https://static.vecteezy.com/system/resources/previews/017/221/797/non_2x/facebook-logo-transparent-background-free-png.png" alt="App Logo" className="h-20 mt-[-18px] w-19 pl-4 cursor-pointer" /></NavLink>
+              <NavLink to={"/youtube"} > <img src="https://static.vecteezy.com/system/resources/previews/018/930/572/non_2x/youtube-logo-youtube-icon-transparent-free-png.png" alt="App Logo" className="h-24 mt-[-27px]  cursor-pointer" /></NavLink>
+            </div>
+            <div>
+              <NavLink to={"/chatbot"} className={({ isActive }) =>
+                              `flex items-center space-x-3 p-3 bg-blue-100 rounded-lg hover:bg-blue-50 ${
+                                isActive ? "bg-blue-100 text-blue-600 " : "text-gray-700"
+                              }`
+                            }>
+                            <Users />
+                            <span>ChatBot</span>
+                          </NavLink>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">

@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: 'http://localhost:5173',
   credentials: true,
 }));
 
@@ -69,10 +69,10 @@ class LangflowClient {
     async runFlow(flowIdOrName, langflowId, inputValue, inputType = 'chat', outputType = 'chat', tweaks = {}, stream = false, onUpdate, onClose, onError) {
         try {
             const initResponse = await this.initiateSession(flowIdOrName, langflowId, inputValue, inputType, outputType, stream, tweaks);
-            console.log('Init Response:', initResponse);
+            // console.log('Init Response:', initResponse);
             if (stream && initResponse && initResponse.outputs && initResponse.outputs[0].outputs[0].artifacts.stream_url) {
                 const streamUrl = initResponse.outputs[0].outputs[0].artifacts.stream_url;
-                console.log(`Streaming from: ${streamUrl}`);
+                // console.log(`Streaming from: ${streamUrl}`);
                 this.handleStream(streamUrl, onUpdate, onClose, onError);
             }
             return initResponse;
@@ -123,11 +123,11 @@ app.post('/chat', async (req, res) => {
             tweaks,
             stream === 'true', // stream should be true/false
             (data) => {
-                console.log('Stream update:', data.chunk);
+                // console.log('Stream update:', data.chunk);
                 res.write(JSON.stringify(data.chunk)); // streaming output
             },
             (message) => {
-                console.log('Stream closed:', message);
+                // console.log('Stream closed:', message);
                 res.end(); // close response after stream
             },
             (error) => {

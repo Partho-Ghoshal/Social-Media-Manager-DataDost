@@ -21,9 +21,10 @@ function Facebook() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
-      <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6 ml-64">
+      
         <Sidebar />
+      <div className="flex h-screen bg-gradient-to-br from-blue-50 to-purple-50">
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
             <h1 className="text-2xl font-bold mb-4 text-gray-800">Facebook Account Dashboard</h1>

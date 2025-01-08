@@ -3,8 +3,11 @@ import bodyParser from 'body-parser';
 import fetch from 'node-fetch'; // Make sure fetch is available in your Node.js environment
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from "path";
 
 dotenv.config();
+const __dirname = path.resolve();
+
 
 const app = express();
 app.use(cors({
@@ -148,6 +151,17 @@ app.post('/chat', async (req, res) => {
         res.status(500).send({ error: 'Error during processing' });
     }
 });
+
+
+if (process.env.NODE_ENV === "production"){
+    console.log(process.env.NODE_ENV);
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    });
+}
+
 
 // Start the server
 app.listen(port, () => {
